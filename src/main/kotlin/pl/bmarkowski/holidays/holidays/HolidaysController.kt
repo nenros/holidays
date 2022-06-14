@@ -1,21 +1,35 @@
 package pl.bmarkowski.holidays.holidays
 
-import org.springframework.stereotype.Component
-import org.springframework.web.reactive.function.server.*
-import pl.bmarkowski.holidays.holidays.request.HolidayRequest
+import org.springframework.format.annotation.DateTimeFormat
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
+import pl.bmarkowski.holidays.holidays.exceptions.HolidayNotFoundException
+import pl.bmarkowski.holidays.holidays.response.HolidayResponse
+import java.time.LocalDate
 
-@Component
-class HolidaysHandler(private val holidaysService: HolidaysService) {
+@RestController
+@RequestMapping("/holidays")
+class HolidaysController(private val holidaysService: HolidaysService) {
 
-    suspend fun getNearestHolidays(request: ServerRequest): ServerResponse {
-        val date = request.queryParamOrNull("date")
-        val lang1 = request.queryParamOrNull("lang1")
-        val lang2 = request.queryParamOrNull("lang2")
-        
-        val holiday = holidaysService.getNearestSameHolidayForCountriesAfterDate(requestBody.date, requestBody.lang1, requestBody.lang2)
-        
-        return ServerResponse.ok()
-            .json()
-            .bodyValueAndAwait(holiday)
+    @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
+    suspend fun getNearestHolidays(
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam  date: LocalDate,
+        @RequestParam country1: String,
+        @RequestParam country2: String
+    ) : HolidayResponse = holidaysService.getNearestSameHolidayForCountriesAfterDate(date, country1, country2).toHolidayResponse()
+
+    @ExceptionHandler(HolidayNotFoundException::class)
+    fun handleNotFoundHoliday(exception: HolidayNotFoundException) : ResponseEntity<Unit>{
+        return ResponseEntity(HttpStatus.NOT_FOUND)
     }
+}
+
+private fun  Holiday.toHolidayResponse(): HolidayResponse {
+ return HolidayResponse(this.date, this.country1Names.joinToString(","), this.country2Names.joinToString(","))
 }

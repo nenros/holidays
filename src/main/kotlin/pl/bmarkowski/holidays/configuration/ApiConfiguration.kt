@@ -1,3 +1,8 @@
 package pl.bmarkowski.holidays.configuration
 
-data class ApiConfiguration()
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.context.properties.ConstructorBinding
+
+@ConstructorBinding
+@ConfigurationProperties("holidays")
+data class ApiConfiguration(val apiKey: String)
