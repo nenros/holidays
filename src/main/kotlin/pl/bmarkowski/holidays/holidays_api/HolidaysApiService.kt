@@ -1,9 +1,7 @@
 package pl.bmarkowski.holidays.holidays_api
 
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.awaitBody
-import org.springframework.web.reactive.function.client.awaitExchange
+import org.springframework.web.reactive.function.client.*
 import pl.bmarkowski.holidays.configuration.ApiConfiguration
 import java.time.LocalDate
 
@@ -19,6 +17,7 @@ class HolidaysApiService(private val properties: ApiConfiguration) {
             it.queryParam("key", properties.apiKey)
             it.queryParam("country", country)
             it.queryParam("year", date.year)
+            it.queryParam("public", true)
             it.build()
         }
             .awaitExchange {

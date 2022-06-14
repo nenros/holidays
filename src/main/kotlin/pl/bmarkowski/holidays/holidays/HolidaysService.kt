@@ -26,6 +26,7 @@ class HolidaysService(private val holidaysApiService: HolidaysApiService) {
                     .groupBy { holiday -> holiday.first }
                     .mapValues { holidays -> holidays.value.map { holiday -> holiday.second } }
             }
+            .filter { it.value.keys.size > 1 }
             .minWithOrNull(compareBy { it.key })?.let {
                 Holiday(
                     date = it.key,
